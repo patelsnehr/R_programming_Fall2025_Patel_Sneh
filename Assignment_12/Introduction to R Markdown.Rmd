@@ -1,0 +1,66 @@
+---
+title: "My R Markdown Primer"
+author: "Sneh Patel"
+date: "2025-11-17"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+```
+
+## R Markdown
+
+R Markdown is a versatile tool that combines text, code, and outputs into a single, reproducible document.  It enables users to create reports that contain statistical analysis, tables, and visualizations generated directly from R.  This keeps your documentation dynamic and up to date with the data being analyzed.
+
+## Mathematical Example
+
+Inline math example: \( \alpha + \beta = \gamma \)
+
+Displayed equation:
+
+\[
+E = mc^2
+\]
+
+## About the Data
+
+In this document, we will explore the built-in `mtcars` dataset from R. It contains data about various car models, including their fuel consumption and performance statistics, making it ideal for simple data summaries and visualizations.
+
+## R Code Example 1: Loading and Summarizing Data
+
+```{r mtcars}
+#Load dataset
+data(mtcars)
+#Display summary statistics
+summary(mtcars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r ScatterPlot, echo= TRUE}
+#Create a scatterplot: Miles per gallon vs horsepower
+ggplot(mtcars, aes(x = hp, y = mpg, color = factor(cyl))) +
+geom_point(size = 3) +
+theme_minimal() +
+labs(
+title = "Fuel Efficiency vs Horsepower",
+subtitle = "Colored by number of cylinders",
+x = "Horsepower",
+y = "Miles Per Gallon",
+color = "Cylinders"
+)
+```
+
+Note that the `echo = FALSE` parameter can be added to the code chunk to prevent printing of the R code that generated the plot.
+
+## Reflection
+
+Working with R Markdown increases both efficiency and accuracy while creating reports.  Changes to data or code are immediately reflected in the outputs after knitting, minimizing human mistake.  Compared to creating static reports, this method promotes transparency and reproducibility because the analytical stages are visible and reproducible.
+
+## Knit and Review Tips
+
+When compiling to HTML, plots and formatted equations render neatly in-browser. If a chunk fails, review dependencies and ensure packages like `ggplot2` are installed. Previewing the output after each major edit helps maintain consistent styling.
