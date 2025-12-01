@@ -1,0 +1,16 @@
+Package: biopsyAnalyzer
+Type: Package
+Title: Breast Cancer Biopsy Analysis Tools
+Version: 1.0.0
+Date: 2025-11-30
+Authors@R: person("Sneh", "Patel", email = "prs23@usf.edu", role = c("aut", "cre"))
+Maintainer: Sneh Patel <prs23@usf.edu>
+Description: Tools for analyzing breast cancer biopsy data including risk scoring,
+    classification, and feature analysis. Implements S3 methods with defensive programming.
+    Created for Dr. Alon Friedman's R Programming course at University of South Florida.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Depends: R (>= 4.0.0)
+Imports: ggplot2, dplyr
+RoxygenNote: 7.2.3

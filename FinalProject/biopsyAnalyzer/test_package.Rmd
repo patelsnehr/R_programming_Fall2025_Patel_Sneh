@@ -1,0 +1,262 @@
+---
+title: "biopsyAnalyzer Package Test"
+author: "Sneh Patel"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+# Breast Cancer Biopsy Analysis Package
+
+**Author:** Sneh Patel  
+**Email:** prs23@usf.edu  
+**Course:** Dr. Alon Friedman, University of South Florida
+
+---
+
+## Package Overview
+
+This package analyzes breast cancer biopsy data to:
+
+- Calculate malignancy risk scores (0-100)
+- Classify tumors as benign or malignant
+- Identify important diagnostic features
+- Evaluate prediction accuracy
+
+---
+
+## Load Package and Data
+
+```{r load}
+# Load package
+devtools::load_all(".")
+
+# Load dataset
+data(biopsy)
+
+# Display basic information
+cat("Dataset contains:", nrow(biopsy), "cases\n")
+cat("Benign cases:", sum(biopsy$class == "benign"), "\n")
+cat("Malignant cases:", sum(biopsy$class == "malignant"), "\n")
+```
+
+## Dataset Preview
+
+```{r preview}
+head(biopsy, 10)
+```
+
+---
+
+## Function 1: Calculate Malignancy Risk
+
+Calculates a weighted risk score (0-100) based on 9 cellular characteristics.
+
+```{r function1}
+# Low risk case (benign characteristics)
+risk_low <- calculate_malignancy_risk(5, 1, 1, 1, 2, 1, 3, 1, 1)
+cat("Low risk case - Risk Score:", risk_low, "\n")
+
+# High risk case (malignant characteristics)
+risk_high <- calculate_malignancy_risk(10, 10, 10, 8, 7, 10, 9, 7, 1)
+cat("High risk case - Risk Score:", risk_high, "\n")
+
+# Medium risk case
+risk_medium <- calculate_malignancy_risk(5, 4, 4, 5, 7, 1, 3, 2, 1)
+cat("Medium risk case - Risk Score:", risk_medium, "\n")
+```
+
+---
+
+## Function 2: Classify Tumor
+
+Classifies tumor as benign or malignant based on risk score threshold.
+
+```{r function2}
+cat("Low risk classification:", classify_tumor(risk_low), "\n")
+cat("Medium risk classification:", classify_tumor(risk_medium), "\n")
+cat("High risk classification:", classify_tumor(risk_high), "\n")
+```
+
+---
+
+## Function 3: Biopsy Assessment (S3 Object)
+
+Creates a comprehensive assessment object with all patient information.
+
+```{r function3}
+# Create assessment for a benign case
+assessment_benign <- biopsy_assessment(
+  ID = "PATIENT_001",
+  V1 = 5, V2 = 1, V3 = 1, V4 = 1, V5 = 2,
+  V6 = 1, V7 = 3, V8 = 1, V9 = 1,
+  actual_class = "benign"
+)
+
+print(assessment_benign)
+```
+
+```{r function3b}
+# Create assessment for a malignant case
+assessment_malignant <- biopsy_assessment(
+  ID = "PATIENT_002",
+  V1 = 10, V2 = 10, V3 = 10, V4 = 8, V5 = 7,
+  V6 = 10, V7 = 9, V8 = 7, V9 = 1,
+  actual_class = "malignant"
+)
+
+print(assessment_malignant)
+```
+
+---
+
+## Function 4: Analyze Feature Importance
+
+Identifies which cellular characteristics are most important for diagnosis.
+
+```{r function4}
+importance <- analyze_feature_importance(biopsy)
+knitr::kable(importance, caption = "Feature Importance Rankings")
+```
+
+### Visualization
+
+```{r function4_plot, fig.width=10, fig.height=6}
+library(ggplot2)
+
+ggplot(importance, aes(x = reorder(Feature, Importance_Score), y = Importance_Score)) +
+  geom_bar(stat = "identity", fill = "#4682B4", alpha = 0.8) +
+  coord_flip() +
+  labs(
+    title = "Feature Importance in Cancer Diagnosis",
+    x = "",
+    y = "Importance Score (0-100)"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 14, face = "bold"),
+    axis.text = element_text(size = 10)
+  )
+```
+
+**Key Finding:** `r importance$Feature[1]` is the most important feature with an importance score of `r importance$Importance_Score[1]`.
+
+---
+
+## Function 5: Evaluate Model Performance
+
+Tests prediction accuracy on all cases.
+
+```{r function5}
+performance <- evaluate_model_performance(biopsy)
+print(performance)
+```
+
+### Performance Summary
+
+- **Total Cases:** `r performance$n_cases`
+- **Accuracy:** `r sprintf("%.2f%%", performance$accuracy * 100)`
+- **Sensitivity:** `r sprintf("%.2f%%", performance$sensitivity * 100)` (True Positive Rate)
+- **Specificity:** `r sprintf("%.2f%%", performance$specificity * 100)` (True Negative Rate)
+
+---
+
+## Complete Analysis Example
+
+Let's analyze a real case from the dataset:
+
+```{r complete_example}
+# Select first case
+case <- biopsy[1, ]
+
+cat("Analyzing Case ID:", case$ID, "\n")
+cat("Actual Diagnosis:", case$class, "\n\n")
+
+# Create full assessment
+assessment <- biopsy_assessment(
+  ID = case$ID,
+  V1 = case$V1, V2 = case$V2, V3 = case$V3,
+  V4 = case$V4, V5 = case$V5, V6 = case$V6,
+  V7 = case$V7, V8 = case$V8, V9 = case$V9,
+  actual_class = case$class
+)
+
+print(assessment)
+```
+
+---
+
+## Summary Statistics
+
+```{r summary_stats}
+# Calculate risk scores for all cases
+risk_scores <- sapply(1:nrow(biopsy), function(i) {
+  suppressWarnings(
+    calculate_malignancy_risk(
+      biopsy$V1[i], biopsy$V2[i], biopsy$V3[i],
+      biopsy$V4[i], biopsy$V5[i], biopsy$V6[i],
+      biopsy$V7[i], biopsy$V8[i], biopsy$V9[i]
+    )
+  )
+})
+
+# Statistics by class
+stats <- data.frame(
+  Class = c("Benign", "Malignant"),
+  Count = c(sum(biopsy$class == "benign"), sum(biopsy$class == "malignant")),
+  Mean_Risk = c(
+    mean(risk_scores[biopsy$class == "benign"]),
+    mean(risk_scores[biopsy$class == "malignant"])
+  ),
+  Median_Risk = c(
+    median(risk_scores[biopsy$class == "benign"]),
+    median(risk_scores[biopsy$class == "malignant"])
+  ),
+  SD_Risk = c(
+    sd(risk_scores[biopsy$class == "benign"]),
+    sd(risk_scores[biopsy$class == "malignant"])
+  )
+)
+
+knitr::kable(stats, digits = 2, caption = "Risk Score Statistics by Diagnosis")
+```
+
+---
+
+## Conclusions
+
+1. **Model Performance:** The algorithm achieves `r sprintf("%.1f%%", performance$accuracy * 100)` accuracy in classifying breast tumors.
+
+2. **Most Important Feature:** `r importance$Feature[1]` shows the strongest difference between benign and malignant cases (importance score: `r importance$Importance_Score[1]`).
+
+3. **Risk Score Distribution:** 
+   - Benign cases average `r sprintf("%.1f", mean(risk_scores[biopsy$class == "benign"]))` risk score
+   - Malignant cases average `r sprintf("%.1f", mean(risk_scores[biopsy$class == "malignant"]))` risk score
+
+4. **Clinical Utility:** This tool can help prioritize high-risk cases for immediate review.
+
+---
+
+## Package Information
+
+```{r package_info}
+# Display package metadata
+desc <- read.dcf("DESCRIPTION")
+cat("Package Name:", desc[, "Package"], "\n")
+cat("Version:", desc[, "Version"], "\n")
+cat("Author:", desc[, "Authors@R"], "\n")
+cat("License:", desc[, "License"], "\n")
+```
+
+---
+
+**All 5 unique functions tested successfully!** ✓
+
+- `calculate_malignancy_risk()` ✓
+- `classify_tumor()` ✓
+- `biopsy_assessment()` ✓
+- `analyze_feature_importance()` ✓
+- `evaluate_model_performance()` ✓
